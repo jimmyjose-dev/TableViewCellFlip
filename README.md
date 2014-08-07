@@ -10,7 +10,7 @@ Screenshots
 ---------
 
 
-![TableViewCellFlip Screenshot](http://i61.tinypic.com/10hooea.gif)
+![TableViewCellFlip Screenshot](http://i61.tinypic.com/sqh9n8.gif)
 
 ----------
 
