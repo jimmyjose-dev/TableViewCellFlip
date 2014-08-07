@@ -11,16 +11,14 @@
 
 #define kFlipVerticalTime 0.5
 #define kFlipHorizontalTime 0.6
+#define kDelayTime 0.0
+#define kAnimationEasingType UIViewAnimationOptionCurveEaseInOut
 
 @interface ViewController () <UITableViewDelegate, UITableViewDataSource>
 @property IBOutlet UITableView *tableView;
 @property NSArray *tableViewDataSource;
 @end
 
-typedef enum : NSUInteger {
-	kClockWiseDirection = -1,
-	kAntiClockWiseDirection = 1,
-} kRotationDirection;
 
 @implementation ViewController
 
@@ -80,12 +78,12 @@ typedef enum : NSUInteger {
 	NSTimeInterval timeInterval = kFlipHorizontalTime;
 	NSString *msg = @"Hello is now changed";
 	int tag = 3;
-	cell.layer.transform = [self performHorizontalFlipInDirection:kClockWiseDirection];
+	cell.layer.transform = [self performHorizontalFlipInClockwiseDirection:YES];
 	if (sender.tag) {
 		tag = 4;
 		timeInterval = kFlipVerticalTime;
 		msg = @"World is now changed";
-		cell.layer.transform = [self performVerticalFlipInDirection:kClockWiseDirection];
+		cell.layer.transform = [self performVerticalFlipInClockwiseDirection:YES];
 	}
 
 
@@ -100,8 +98,8 @@ typedef enum : NSUInteger {
 	NSString *imageName = [NSString stringWithFormat:@"%d.jpg", tag];
 
 	[UIView animateWithDuration:timeInterval
-	                      delay:0.0
-	                    options:UIViewAnimationOptionCurveEaseInOut
+	                      delay:kDelayTime
+	                    options:kAnimationEasingType
 	                 animations: ^{
 	    cell.layer.transform = CATransform3DIdentity;
 	    cell.textLabel.textColor = [UIColor whiteColor];
@@ -122,11 +120,12 @@ typedef enum : NSUInteger {
 
 	NSString *msg = @"Hello";
 	NSTimeInterval timeInterval = kFlipHorizontalTime;
-	cell.layer.transform = [self performHorizontalFlipInDirection:kClockWiseDirection];
+	cell.layer.transform = [self performHorizontalFlipInClockwiseDirection:YES];
 	if (sender.tag) {
 		timeInterval = kFlipVerticalTime;
 		msg = @"World";
-		cell.layer.transform = [self performVerticalFlipInDirection:kClockWiseDirection];
+		cell.layer.transform = [self performVerticalFlipInClockwiseDirection:YES];
+        
 	}
 
 	NSString *imageName = [NSString stringWithFormat:@"%d.jpg", sender.tag];
@@ -141,8 +140,8 @@ typedef enum : NSUInteger {
 	[button addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
 
 	[UIView animateWithDuration:timeInterval
-	                      delay:0.0
-	                    options:UIViewAnimationOptionCurveEaseInOut
+	                      delay:kDelayTime
+	                    options:kAnimationEasingType
 	                 animations: ^{
 	    cell.layer.transform = CATransform3DIdentity;
 	    cell.textLabel.textColor = [UIColor whiteColor];
@@ -158,36 +157,34 @@ typedef enum : NSUInteger {
 	}];
 }
 
-- (CATransform3D)performVerticalFlipInDirection:(kRotationDirection)clockwise {
-	return [self getTransformForIndex:1 inDirection:kClockWiseDirection];
+- (CATransform3D)performVerticalFlipInClockwiseDirection:(BOOL)clockwise {
+	return [self getTransformForIndex:1 inClockwiseDirection:clockwise];
 }
 
-- (CATransform3D)performHorizontalFlipInDirection:(kRotationDirection)clockwise {
-	return [self getTransformForIndex:0 inDirection:clockwise];
+- (CATransform3D)performHorizontalFlipInClockwiseDirection:(BOOL)clockwise {
+	return [self getTransformForIndex:0 inClockwiseDirection:clockwise];
 }
 
-- (CATransform3D)getTransformForIndex:(int)index inDirection:(kRotationDirection)clockwise {
-	int direction = -1;
+- (CATransform3D)getTransformForIndex:(int)index inClockwiseDirection:(BOOL)clockwise {
+	
+    int direction = clockwise ? -1 : 1;
 
-	float xCord = 0.0;
-	float yCord = 1.0;
+	float xCord = index ? 1.0 : 0.0;
+	float yCord = index ? 0.0 : 1.0;
 	float zCord = 0.0;
 
+	//float angle = (180 * direction) * (M_PI / 180);
+    float angle = direction * M_PI;
 
-	if (clockwise) direction = 1;
+	CGPoint offset = CGPointMake(0, 0);
 
-	float rotateAngleBy = (180 * direction) * (M_PI / 180);
-	CGPoint offsetPositioning = CGPointMake(0, 0);
+    CATransform3D transform = CATransform3DIdentity;
+    
+	transform = CATransform3DRotate(transform, angle, xCord, yCord, zCord);
+    
+    transform = CATransform3DTranslate(transform, offset.x, offset.y, 0.0);
 
-	CATransform3D transform = CATransform3DIdentity;
-
-	if (index) {
-		xCord = 1.0; yCord = 0.0;
-	}
-
-	transform = CATransform3DRotate(transform, rotateAngleBy, xCord, yCord, zCord);
-
-	transform = CATransform3DTranslate(transform, offsetPositioning.x, offsetPositioning.y, 0.0);
+	
 	return transform;
 }
 
